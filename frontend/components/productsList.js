@@ -45,13 +45,31 @@ async function renderProductsList(container) {
             productCard.className = 'product-card';
             
             productCard.innerHTML = `
-                <div class="product-name">${product.name}</div>
-                <div class="product-price">$${product.price.toFixed(2)}</div>
-                <div class="product-stock">Stock: ${product.stock}</div>
-                <div class="product-description">${product.description || 'Sin descripción'}</div>
-                <button class="btn add-to-cart" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}">
-                    Agregar al Carrito
-                </button>
+                <div class="product-image-container">
+                    <img src="${product.imageURL || 'placeholder.jpg'}" alt="Imagen de ${product.name}" class="product-image">
+                </div>
+
+                <div class="product-info-body">
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-description">${product.description || 'Artículo de alta calidad y diseño moderno.'}</p>
+                </div>
+
+                <div class="product-footer">
+                    <div class="price-stock-group">
+                        <span class="product-price">$${product.price.toFixed(2)}</span>
+                        <span class="product-stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
+                            ${product.stock > 0 ? `En stock: ${product.stock}` : 'Agotado'}
+                        </span>
+                    </div>
+
+                    <button class="btn add-to-cart" 
+                            data-id="${product.id}" 
+                            data-name="${product.name}" 
+                            data-price="${product.price}"
+                            ${product.stock <= 0 ? 'disabled' : ''}>
+                        ${product.stock > 0 ? 'Agregar al Carrito' : 'Sin Stock'}
+                    </button>
+                </div>
             `;
             
             productsContainer.appendChild(productCard);
