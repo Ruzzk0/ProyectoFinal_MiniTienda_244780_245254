@@ -48,11 +48,11 @@ async function initializeServer() {
     const productCount = await Product.count();
     if (productCount === 0) {
       await Product.bulkCreate([
-        { name: 'Laptop HP', price: 899.99, stock: 10, description: 'Laptop HP con 8GB RAM y 256GB SSD' },
-        { name: 'Mouse Inalámbrico', price: 29.99, stock: 25, description: 'Mouse inalámbrico ergonómico' },
-        { name: 'Teclado Mecánico', price: 79.99, stock: 15, description: 'Teclado mecánico RGB' },
-        { name: 'Monitor 24"', price: 199.99, stock: 8, description: 'Monitor Full HD 24 pulgadas' },
-        { name: 'Auriculares Bluetooth', price: 59.99, stock: 20, description: 'Auriculares con cancelación de ruido' }
+        { name: 'Laptop HP', price: 899.99, stock: 10, description: 'Laptop HP con 8GB RAM y 256GB SSD', imageURL: 'assets/laptopHp.jpg'},
+        { name: 'Mouse Inalámbrico', price: 29.99, stock: 25, description: 'Mouse inalámbrico ergonómico', imageURL: 'assets/mouseInalambrico.jpeg' },
+        { name: 'Teclado Mecánico', price: 79.99, stock: 15, description: 'Teclado mecánico RGB', imageURL: 'assets/tecladoMecanico.jpeg' },
+        { name: 'Monitor 24"', price: 199.99, stock: 8, description: 'Monitor Full HD 24 pulgadas', imageURL: 'assets/monitor24.jpg' },
+        { name: 'Auriculares Bluetooth', price: 59.99, stock: 20, description: 'Auriculares con cancelación de ruido', imageURL: 'assets/audifonosBluetooth.jpg' }
       ]);
       console.log('Datos de ejemplo insertados.');
     }

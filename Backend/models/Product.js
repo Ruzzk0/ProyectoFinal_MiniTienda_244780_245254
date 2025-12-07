@@ -22,6 +22,12 @@ const Product = sequelize.define('Product', {
   description: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  // 🔥 AQUÍ AGREGAMOS LA COLUMNA QUE FALTA 🔥
+  imageURL: {
+    type: DataTypes.STRING,
+    allowNull: true, // Permitimos que sea nulo por si acaso
+    defaultValue: 'assets/placeholder.jpg' // Imagen por defecto
   }
 }, {
   tableName: 'products',
