@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* 🍆 Estilo Transaccional Premium: Inspirado en E-commerce y Seriedad Gubernamental 🇲🇽 */
-
 /* --- Variables de Color de la Paleta --- */
 :root {
     --color-primary-dark: #561530; /* Fondo Header, Texto Serio (Gobierno) */
@@ -9,7 +7,7 @@
     --color-accent-dark: #811844; /* Fondo Oscuro Secundario, Sombras Profundas */
     --color-highlight-gold: #F5AD18; /* Precios, Acentos Críticos (Acción) */
     
-    /* Colores Funcionales (Similares a E-commerce limpios) */
+    /* Colores Funcionales */
     --color-white: #ffffff;
     --color-background-page: #f0f2f5; /* Fondo ligeramente gris (Similar a ML/Amazon) */
     --color-card-background: var(--color-white);
@@ -291,4 +289,125 @@ nav {
     padding: 3rem;
     color: #a0a0a0;
     font-size: 1.1rem;
+}
+/* --- MEJORAS DEL CARRITO (System Design Compatible) --- */
+
+/* Contenedor principal del carrito: Grid de 2 columnas en PC */
+.cart-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 350px; /* Lista ancha | Resumen estrecho */
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .cart-wrapper {
+        grid-template-columns: 1fr; /* Columna única en celular */
+    }
+}
+
+/* Estilo de cada fila de producto */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-card-background);
+    border: 1px solid var(--color-border-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+}
+
+.cart-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.item-details strong {
+    color: var(--color-primary-dark); /* Color vino serio */
+    font-size: 1.1rem;
+    display: block;
+}
+
+.item-details small {
+    color: #666;
+}
+
+.item-subtotal {
+    font-weight: 700;
+    color: var(--color-text-dark);
+    font-size: 1.1rem;
+    margin: 0 1.5rem;
+}
+
+/* --- TARJETA DE RESUMEN (Derecha) --- */
+.cart-summary-card {
+    background: var(--color-card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border-light);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 20px;
+}
+
+.cart-summary-title {
+    font-size: 1.2rem;
+    color: var(--color-primary-dark);
+    border-bottom: 2px solid var(--color-accent-bright);
+    padding-bottom: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.summary-row.total {
+    border-top: 1px solid var(--color-border-light);
+    padding-top: 1rem;
+    margin-top: 1rem;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--color-highlight-gold); /* El dorado para el precio final */
+}
+
+/* Botones del Resumen */
+.summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-checkout {
+    background-color: var(--color-accent-bright); /* Tu color principal de acción */
+    color: white;
+    padding: 1rem;
+    font-size: 1.1rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-checkout:hover {
+    background-color: var(--color-accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(158, 28, 96, 0.3); /* Sombra con el tinte del botón */
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border: 1px solid var(--color-status-error);
+    color: var(--color-status-error);
+    width: 100%;
+}
+.btn-outline-danger:hover {
+    background: #fff5f5;
 }

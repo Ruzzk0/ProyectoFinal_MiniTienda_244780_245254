@@ -1,67 +1,251 @@
 function renderCart(container) {
-    // Limpiar contenedor
+    // 1. Limpieza y Título
     container.innerHTML = '';
     
-    // Crear título
     const title = document.createElement('h1');
     title.textContent = 'Carrito de Compras';
+    title.style.marginBottom = '1.5rem';
     container.appendChild(title);
-    
-    // Obtener carrito del localStorage
+
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
+
+    // 2. Estado Vacío
     if (cart.length === 0) {
         const emptyMessage = document.createElement('div');
         emptyMessage.className = 'empty-message';
-        emptyMessage.textContent = 'Tu carrito está vacío.';
+        emptyMessage.innerHTML = `
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">Tu carrito está vacío.</p>
+            <a href="#/products" class="btn">Ver Productos</a>
+        `;
         container.appendChild(emptyMessage);
         return;
     }
-    
-    // Crear contenedor de items del carrito
-    const cartContainer = document.createElement('div');
-    cartContainer.className = 'cart-items';
-    
-    // Crear items del carrito
+
+    // 3. Crear Estructura de Wrapper (Layout de 2 columnas)
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cart-wrapper';
+
+    // --- COLUMNA IZQUIERDA: ITEMS ---
+    const itemsList = document.createElement('div');
+    itemsList.className = 'cart-items-list';
+
     cart.forEach(item => {
-        const cartItem = document.createElement('div');
-        cartItem.className = 'cart-item';
+        const itemRow = document.createElement('div');
+        itemRow.className = 'cart-item';
         
-        const itemInfo = document.createElement('div');
-        itemInfo.innerHTML = `
-            <div><strong>${item.name}</strong></div>
-            <div>Precio: $${item.price.toFixed(2)}</div>
-            <div>Cantidad: ${item.quantity}</div>
-            <div>Subtotal: $${(item.price * item.quantity).toFixed(2)}</div>
+        itemRow.innerHTML = `
+            <div class="item-details">
+                <strong>${item.name}</strong>
+                <small>Precio: $${item.price.toFixed(2)} | Cant: ${item.quantity}</small>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <span class="item-subtotal">$${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
         `;
-        
-        const removeButton = document.createElement('button');
-        removeButton.className = 'btn btn-danger';
-        removeButton.textContent = 'Eliminar';
-        removeButton.addEventListener('click', () => removeFromCart(item.id));
-        
-        cartItem.appendChild(itemInfo);
-        cartItem.appendChild(removeButton);
-        cartContainer.appendChild(cartItem);
+
+        // Botón Eliminar (Pequeño y discreto)
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-danger';
+        removeBtn.innerHTML = '&times;'; // Icono de X
+        removeBtn.style.padding = '0.4rem 0.8rem';
+        removeBtn.title = "Eliminar producto";
+        removeBtn.onclick = () => removeFromCart(item.id);
+
+        itemRow.children[1].appendChild(removeBtn); // Agregar botón al div de la derecha
+        itemsList.appendChild(itemRow);
     });
+
+    // --- COLUMNA DERECHA: RESUMEN Y ACCIONES ---
     
-    // Calcular total
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    const totalDiv = document.createElement('div');
-    totalDiv.className = 'cart-total';
-    totalDiv.textContent = `Total: $${total.toFixed(2)}`;
-    
-    // Botón para vaciar carrito
-    const clearButton = document.createElement('button');
-    clearButton.className = 'btn btn-danger';
-    clearButton.textContent = 'Vaciar Carrito';
-    clearButton.addEventListener('click', clearCart);
-    
-    container.appendChild(cartContainer);
-    container.appendChild(totalDiv);
-    container.appendChild(clearButton);
+    // Cálculos
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const iva = subtotal * 0.16; // IVA 16%
+    const total = subtotal + iva;
+
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'cart-summary-card';
+
+    summaryCard.innerHTML = `
+        <h3 class="cart-summary-title">Resumen del Pedido</h3>
+        
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <span>$${subtotal.toFixed(2)}</span>
+        </div>
+        <div class="summary-row">
+            <span>IVA (16%)</span>
+            <span>$${iva.toFixed(2)}</span>
+        </div>
+        <div class="summary-row total">
+            <span>Total</span>
+            <span>$${total.toFixed(2)}</span>
+        </div>
+
+        <div class="summary-actions">
+            <button id="btn-checkout" class="btn btn-checkout">
+                Pagar y Facturar 🧾
+            </button>
+            
+            <button id="btn-clear" class="btn btn-outline-danger">
+                Vaciar Carrito
+            </button>
+        </div>
+    `;
+
+    // 4. Ensamblaje
+    wrapper.appendChild(itemsList);
+    wrapper.appendChild(summaryCard);
+    container.appendChild(wrapper);
+
+    // 5. Event Listeners (Conectar lógica)
+    document.getElementById('btn-checkout').addEventListener('click', () => initiateCheckout(cart));
+    document.getElementById('btn-clear').addEventListener('click', clearCart);
 }
+
+// --- FUNCIONES QUE TE FALTABAN ---
+
+// 1. Conecta el botón con el Backend
+async function initiateCheckout(cart) {
+    // Pedir datos (en un caso real usarías un modal bonito, por ahora prompt es funcional)
+    const clientName = prompt("Nombre / Razón Social:") || "Público en General";
+    const rfc = prompt("RFC:") || "XAXX010101000";
+
+    if (!confirm(`¿Confirmar compra por un total de $${calculateTotal(cart)}?`)) return;
+
+    // Feedback visual en el botón
+    const btn = document.getElementById('btn-checkout');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Procesando... ⏳';
+    btn.disabled = true;
+
+    try {
+        // FETCH AL BACKEND
+        const response = await fetch('http://localhost:3000/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cart: cart,
+                clientName: clientName,
+                rfc: rfc
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Error en el servidor');
+        }
+
+        // SI TODO SALIÓ BIEN:
+        // 1. Generar PDF
+        generateInvoicePDF(clientName, rfc, cart, result.folio);
+        
+        // 2. Limpiar carrito
+        localStorage.removeItem('cart');
+        
+        // 3. Avisar al usuario
+        alert(`¡Venta Exitosa!\nFolio: ${result.folio}\nTu factura se ha descargado.`);
+        
+        // 4. Recargar vista (ahora vacía)
+        const content = document.getElementById('content');
+        if (content) renderCart(content);
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Error: " + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// Helper para calcular total rápido
+function calculateTotal(cart) {
+    const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    return (subtotal * 1.16).toFixed(2);
+}
+
+// 2. Genera el PDF (Diseño System Design: Vino y Dorado)
+function generateInvoicePDF(clientName, rfc, cart, folio) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Colores del System Design
+    const colorVino = [86, 21, 48];    // #561530
+    const colorDorado = [245, 173, 24]; // #F5AD18
+
+    // --- ENCABEZADO ---
+    doc.setFillColor(...colorVino);
+    doc.rect(0, 0, 210, 40, 'F'); // Barra superior vino
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("MINI TIENDA OFICIAL", 15, 20);
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Comprobante Fiscal Digital", 15, 30);
+
+    // --- DATOS DEL CLIENTE ---
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Cliente: ${clientName}`, 15, 55);
+    doc.text(`RFC: ${rfc}`, 15, 60);
+    
+    // --- DATOS DE LA VENTA ---
+    doc.text(`Folio: ${folio}`, 140, 55);
+    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 140, 60);
+
+    // --- TABLA DE PRODUCTOS ---
+    const bodyData = cart.map(item => [
+        item.name,
+        item.quantity,
+        `$${item.price.toFixed(2)}`,
+        `$${(item.price * item.quantity).toFixed(2)}`
+    ]);
+
+    doc.autoTable({
+        startY: 70,
+        head: [['Producto', 'Cant.', 'P. Unitario', 'Importe']],
+        body: bodyData,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: colorVino, 
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: { fontSize: 10, cellPadding: 3 }
+    });
+
+    // --- TOTALES ---
+    let finalY = doc.lastAutoTable.finalY + 10;
+    const total = parseFloat(calculateTotal(cart));
+    const subtotal = total / 1.16;
+    const iva = total - subtotal;
+
+    doc.setFontSize(10);
+    doc.text(`Subtotal:`, 150, finalY);
+    doc.text(`$${subtotal.toFixed(2)}`, 195, finalY, { align: 'right' });
+
+    doc.text(`IVA (16%):`, 150, finalY + 6);
+    doc.text(`$${iva.toFixed(2)}`, 195, finalY + 6, { align: 'right' });
+
+    // Total en Dorado y Grande
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...colorDorado);
+    doc.text(`TOTAL:`, 150, finalY + 16);
+    doc.text(`$${total.toFixed(2)}`, 195, finalY + 16, { align: 'right' });
+
+    // --- PIE DE PÁGINA ---
+    doc.setTextColor(150);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Este documento es una representación impresa de un CFDI simulado.", 105, 280, { align: 'center' });
+
+    doc.save(`Factura_${folio}.pdf`);
+}
+
 
 function renderStats(container) {
     // Limpiar contenedor

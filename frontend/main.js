@@ -1,4 +1,4 @@
-// Router principal
+// Router principal main.js
 function router() {
     const app = document.getElementById('app');
     
